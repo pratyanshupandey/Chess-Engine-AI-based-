@@ -12,14 +12,45 @@ def evaluate(board: GameState, for_white: bool) -> int:
         returns an integer score representing current state of the board.
         Higher number is in favour of player given.
     """
-    eval_stime = time()
+    # eval_stime = time()
     ret = (1 if for_white else -1) * evaluate_board(board.board)
-    duration = time()-eval_stime
-    global eval_time, evals_cnt
-    eval_time += duration
-    evals_cnt += 1
-    # print(f"eval time {duration}")
+    # duration = time()-eval_stime
+    # global eval_time, evals_cnt
+    # eval_time += duration
+    # evals_cnt += 1
+    # # print(f"eval time {duration}")
+    for line in board.board:
+        print(line)
+    print(for_white)
+    print(ret)
     return ret
+
+
+piece_value = {
+    "wp": 100, "bp": 100,
+    "wN": 300, "bN": 300,
+    "wB": 300, "bB": 300,
+    "wR": 500, "bR": 500,
+    "wQ": 900, "bQ": 900
+}
+
+
+def move_score(move: Move) -> int:
+    """
+    Returns the score of the move
+    """
+    score = 0
+    if move.pieceCaptured != "--":
+        score = piece_value[move.pieceCaptured]
+        score -= (piece_value[move.pieceMoved])/100
+    else:
+        score = (piece_value[move.pieceMoved])/100
+        if(move.isPawnPromotion):
+            score += 1000
+        # if(move.castle)
+        # score =
+        # pass
+    return score
 
 
 def minimax(board: GameState, alpha: float, beta: float, maximizer: bool, curDepth: int, max_depth: int) -> Tuple[float, Move]:
@@ -39,6 +70,7 @@ def minimax(board: GameState, alpha: float, beta: float, maximizer: bool, curDep
         return +inf if maximizer else -inf, None
 
     moves = list(board.getValidMoves())
+    # moves.sort(key=move_score, reverse=True)
     assert moves != []
     best_move = None
     if maximizer:
@@ -102,9 +134,9 @@ def next_move(board: GameState) -> Move:
         returns best move calculated till timeout
     """
     global timeout, stime, final_move
-    initial_depth = 4
-    depth_extension_limit = 10
-    timeout = 20  # in seconds
+    initial_depth = 2
+    depth_extension_limit = 0
+    timeout = 100  # in seconds
     final_move = None
     stime = time()
     assert not board.is_game_over()
